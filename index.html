@@ -458,6 +458,58 @@
             calculateScore();
         }
         
+        function submitToGoogleForms(userData, email = null) {
+            console.log('Submitting to Google Forms...', { userData, email });
+            
+            const siteUrl = document.getElementById('siteUrl').value;
+            
+            // Build URL with query parameters
+            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
+            
+            const params = new URLSearchParams({
+                'entry.1369606948': email || '', // Email (empty on first submission)
+                'entry.1494711612': siteUrl,
+                'entry.735261850': userData.vertical,
+                'entry.917309978': userData.pageviews,
+                'entry.1931470314': userData.discoverTraffic,
+                'entry.107284355': userData.publishFrequency,
+                'entry.1100522340': userData.imageCount,
+                'entry.631904103': userData.score,
+                'entry.428354401': new Date().toISOString()
+            });
+            
+            // Use iframe method for better compatibility
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.name = 'hidden_iframe_' + Date.now();
+            document.body.appendChild(iframe);
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = formUrl;
+            form.target = iframe.name;
+            
+            // Add all fields as hidden inputs
+            params.forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+            
+            console.log('Form submitted via iframe method', email ? 'WITH email' : 'WITHOUT email');
+            
+            // Clean up after a moment
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 1000);
+        }
+        
         // Scoring logic
         const verticalScores = {
             food: 25, lifestyle: 22, parenting: 20, travel: 18, diy: 18,
@@ -726,7 +778,7 @@
                 document.body.removeChild(iframe);
             }, 1000);
             
-            // Show success message immediately z
+            // Show success message immediately
             document.querySelector('.email-gate').innerHTML = `
                 <h3>Check your inbox!</h3>
                 <p style="font-size: 18px; margin-top: 16px;">Your complete Discover Readiness Report is on its way. We've also added you to our Creator Success series where you'll get actionable tips to grow your traffic and revenue.</p>
