@@ -658,12 +658,37 @@
                 return;
             }
             
-            console.log('Email submitted:', email);
+            // Collect all form data
+            const formData = new FormData();
             
+            // Map to your Google Form fields (in order)
+            formData.append('entry.1369606948', email); // Email
+            formData.append('entry.1494711612', document.getElementById('siteUrl').value); // Site URL
+            formData.append('entry.735261850', document.getElementById('vertical').value); // Vertical
+            formData.append('entry.917309978', document.getElementById('pageviews').value); // Pageviews
+            formData.append('entry.1931470314', document.querySelector('input[name="discoverTraffic"]:checked').value); // Discover Traffic
+            formData.append('entry.107284355', document.getElementById('publishFrequency').value); // Publish Frequency
+            formData.append('entry.1100522340', document.getElementById('imageCount').value); // Image Count
+            formData.append('entry.631904103', document.getElementById('scoreNumber').textContent); // Score
+            formData.append('entry.428354401', new Date().toISOString()); // Timestamp
+            
+            // Submit to Google Form
+            fetch('https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse', {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                console.log('Form submitted successfully');
+            }).catch(error => {
+                console.error('Submission error:', error);
+                // Still show success since no-cors prevents error detection
+            });
+            
+            // Show success message immediately
             document.querySelector('.email-gate').innerHTML = `
                 <h3>Check your inbox!</h3>
                 <p style="font-size: 18px; margin-top: 16px;">Your complete Discover Readiness Report is on its way. We've also added you to our Creator Success series where you'll get actionable tips to grow your traffic and revenue.</p>
-                <p style="margin-top: 24px; font-size: 14px; opacity: 0.8;">Want to talk strategy? <a href="#" style="color: white; text-decoration: underline;">Schedule a call with our team</a></p>
+                <p style="margin-top: 24px; font-size: 14px; opacity: 0.8;">Want to talk strategy? <a href="https://raptive.com/contact" style="color: white; text-decoration: underline;">Schedule a call with our team</a></p>
             `;
         }
     </script>
