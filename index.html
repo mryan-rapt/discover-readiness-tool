@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Discover Readiness Score</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #6b65ff 0%, #354786 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #6b65ff;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #1a1a1a;
+            font-size: 32px;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1dad4;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+        
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #6b65ff;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        
+        .radio-option {
+            flex: 1;
+        }
+        
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-option label {
+            display: block;
+            padding: 14px;
+            border: 2px solid #e1dad4;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .radio-option input[type="radio"]:checked + label {
+            border-color: #6b65ff;
+            background: #f0edeb;
+            color: #6b65ff;
+        }
+        
+        .cta-button {
+            width: 100%;
+            padding: 18px;
+            background: #6b65ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 32px;
+        }
+        
+        .cta-button:hover {
+            background: #5548cc;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(107, 101, 255, 0.3);
+        }
+        
+        .cta-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .score-display {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .score-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 56px;
+            font-weight: 700;
+            color: #6b65ff;
+        }
+        
+        .score-label {
+            font-size: 20px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .score-rating {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        
+        .rating-excellent { background: #d2ff66; color: #00785d; }
+        .rating-good { background: #ecb5d2; color: #a23b4c; }
+        .rating-fair { background: #ff7858; color: white; }
+        .rating-needs-work { background: #e1dad4; color: #978985; }
+        
+        .insight-box {
+            background: #f0edeb;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        
+        .insight-box h3 {
+            color: #1a1a1a;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .insight-box p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .action-items {
+            margin: 32px 0;
+        }
+        
+        .action-items h3 {
+            color: #1a1a1a;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .action-item {
+            background: white;
+            border-left: 4px solid #6b65ff;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .action-item h4 {
+            color: #1a1a1a;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .action-item p {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .priority-high { background: #ff7858; color: white; }
+        .priority-medium { background: #d2ff66; color: #00785d; }
+        .priority-low { background: #e1dad4; color: #978985; }
+        
+        .email-gate {
+            background: linear-gradient(135deg, #6b65ff 0%, #354786 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .email-gate h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .email-gate p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .email-gate input[type="email"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .email-gate button {
+            background: white;
+            color: #6b65ff;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .email-gate button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .stat-highlight {
+            font-size: 28px;
+            font-weight: 700;
+            color: #6b65ff;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">
+                <h1>Raptive</h1>
+            </div>
+            
+            <div id="assessmentForm">
+                <h2>Is your site ready for Google Discover?</h2>
+                <p class="subtitle">Take this 2-minute assessment to find out your readiness score and unlock personalized recommendations</p>
+                
+                <div class="form-group">
+                    <label for="siteUrl">What's your website URL?</label>
+                    <input type="url" id="siteUrl" placeholder="https://yoursite.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="vertical">What's your primary content vertical?</label>
+                    <select id="vertical">
+                        <option value="">Select one...</option>
+                        <option value="food">Food & Recipes</option>
+                        <option value="lifestyle">Lifestyle & Home</option>
+                        <option value="parenting">Parenting & Family</option>
+                        <option value="travel">Travel</option>
+                        <option value="diy">DIY & Crafts</option>
+                        <option value="finance">Finance & Money</option>
+                        <option value="tech">Technology</option>
+                        <option value="health">Health & Wellness</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pageviews">What are your average monthly pageviews?</label>
+                    <select id="pageviews">
+                        <option value="">Select one...</option>
+                        <option value="under50k">Under 50K</option>
+                        <option value="50k-100k">50K - 100K</option>
+                        <option value="100k-250k">100K - 250K</option>
+                        <option value="250k-500k">250K - 500K</option>
+                        <option value="500k-1m">500K - 1M</option>
+                        <option value="over1m">Over 1M</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Do you currently get traffic from Google Discover?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="discoverYes" name="discoverTraffic" value="yes">
+                            <label for="discoverYes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="discoverNo" name="discoverTraffic" value="no">
+                            <label for="discoverNo">No</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="discoverUnknown" name="discoverTraffic" value="unknown">
+                            <label for="discoverUnknown">Don't Know</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>How often do you publish new content?</label>
+                    <select id="publishFrequency">
+                        <option value="">Select one...</option>
+                        <option value="daily">Daily or more</option>
+                        <option value="weekly">2-5 times per week</option>
+                        <option value="biweekly">Once a week</option>
+                        <option value="monthly">2-3 times per month</option>
+                        <option value="rarely">Once a month or less</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>How many high-quality images do you typically include per post?</label>
+                    <select id="imageCount">
+                        <option value="">Select one...</option>
+                        <option value="many">10+ images</option>
+                        <option value="several">5-9 images</option>
+                        <option value="some">2-4 images</option>
+                        <option value="few">1 image</option>
+                        <option value="none">Mostly text-based</option>
+                    </select>
+                </div>
+                
+                <button type="button" class="cta-button" onclick="handleSubmit()">Calculate My Readiness Score</button>
+            </div>
+            
+            <div id="results" class="results">
+                <h2>Your Google Discover Readiness Score</h2>
+                
+                <div class="score-display">
+                    <div class="score-circle">
+                        <canvas id="scoreCanvas" width="180" height="180"></canvas>
+                        <div class="score-number" id="scoreNumber">0</div>
+                    </div>
+                    <div class="score-label">Readiness Score</div>
+                    <div class="score-rating" id="scoreRating"></div>
+                </div>
+                
+                <div class="insight-box">
+                    <h3>Your Opportunity</h3>
+                    <p>Based on sites similar to yours, you could gain an estimated <span class="stat-highlight" id="trafficOpportunity">0</span> monthly pageviews from Google Discover. That's a potential <span class="stat-highlight" id="revenueOpportunity">$0</span> in additional annual revenue.</p>
+                </div>
+                
+                <div class="action-items">
+                    <h3>Your personalized action plan</h3>
+                    <div id="actionItemsList"></div>
+                </div>
+                
+                <div class="email-gate">
+                    <h3>Want the complete analysis?</h3>
+                    <p>Get your full Discover Readiness Report with detailed optimization guides, technical checklist, and expert insights from Raptive's team.</p>
+                    <input type="email" id="emailInput" placeholder="Enter your email">
+                    <button onclick="submitEmail()">Send Me the Full Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function handleSubmit() {
+            const vertical = document.getElementById('vertical').value;
+            const pageviews = document.getElementById('pageviews').value;
+            const discoverTraffic = document.querySelector('input[name="discoverTraffic"]:checked');
+            const publishFrequency = document.getElementById('publishFrequency').value;
+            const imageCount = document.getElementById('imageCount').value;
+            
+            if (!vertical || !pageviews || !discoverTraffic || !publishFrequency || !imageCount) {
+                alert('Please answer all questions to calculate your score');
+                return;
+            }
+            
+            calculateScore();
+        }
+        
+        // Scoring logic
+        const verticalScores = {
+            food: 25, lifestyle: 22, parenting: 20, travel: 18, diy: 18,
+            health: 16, finance: 12, tech: 10, other: 15
+        };
+        
+        const pageviewScores = {
+            'under50k': 5, '50k-100k': 10, '100k-250k': 15,
+            '250k-500k': 20, '500k-1m': 22, 'over1m': 25
+        };
+        
+        const discoverTrafficScores = {
+            yes: 20, no: 5, unknown: 10
+        };
+        
+        const publishFrequencyScores = {
+            daily: 20, weekly: 15, biweekly: 10, monthly: 5, rarely: 2
+        };
+        
+        const imageCountScores = {
+            many: 10, several: 8, some: 5, few: 3, none: 1
+        };
+        
+        function calculateScore() {
+            const vertical = document.getElementById('vertical').value;
+            const pageviews = document.getElementById('pageviews').value;
+            const discoverTraffic = document.querySelector('input[name="discoverTraffic"]:checked').value;
+            const publishFrequency = document.getElementById('publishFrequency').value;
+            const imageCount = document.getElementById('imageCount').value;
+            
+            let score = 0;
+            score += verticalScores[vertical] || 0;
+            score += pageviewScores[pageviews] || 0;
+            score += discoverTrafficScores[discoverTraffic] || 0;
+            score += publishFrequencyScores[publishFrequency] || 0;
+            score += imageCountScores[imageCount] || 0;
+            
+            const userData = { vertical, pageviews, discoverTraffic, publishFrequency, imageCount, score };
+            
+            displayResults(userData);
+        }
+        
+        function displayResults(data) {
+            document.getElementById('assessmentForm').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+            
+            animateScore(data.score);
+            drawScoreCircle(data.score);
+            
+            const rating = getRating(data.score);
+            const ratingEl = document.getElementById('scoreRating');
+            ratingEl.textContent = rating.text;
+            ratingEl.className = 'score-rating ' + rating.class;
+            
+            const opportunity = calculateOpportunity(data);
+            document.getElementById('trafficOpportunity').textContent = opportunity.traffic;
+            document.getElementById('revenueOpportunity').textContent = opportunity.revenue;
+            
+            generateActionItems(data);
+        }
+        
+        function animateScore(targetScore) {
+            const scoreEl = document.getElementById('scoreNumber');
+            let current = 0;
+            const increment = targetScore / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= targetScore) {
+                    current = targetScore;
+                    clearInterval(timer);
+                }
+                scoreEl.textContent = Math.round(current);
+            }, 20);
+        }
+        
+        function drawScoreCircle(score) {
+            const canvas = document.getElementById('scoreCanvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = 90;
+            const centerY = 90;
+            const radius = 70;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#f0edeb';
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            
+            const percent = score / 100;
+            const endAngle = -0.5 * Math.PI + (2 * Math.PI * percent);
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -0.5 * Math.PI, endAngle);
+            ctx.strokeStyle = '#6b65ff';
+            ctx.lineWidth = 15;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+        
+        function getRating(score) {
+            if (score >= 80) return { text: 'Excellent', class: 'rating-excellent' };
+            if (score >= 60) return { text: 'Good', class: 'rating-good' };
+            if (score >= 40) return { text: 'Fair', class: 'rating-fair' };
+            return { text: 'Needs Work', class: 'rating-needs-work' };
+        }
+        
+        function calculateOpportunity(data) {
+            const pageviewMultipliers = {
+                'under50k': 0.5, '50k-100k': 0.75, '100k-250k': 1,
+                '250k-500k': 1.5, '500k-1m': 2, 'over1m': 3
+            };
+            
+            const verticalMultipliers = {
+                food: 0.25, lifestyle: 0.22, parenting: 0.20, travel: 0.18,
+                diy: 0.18, health: 0.15, finance: 0.10, tech: 0.08, other: 0.15
+            };
+            
+            const baseTraffic = 50000;
+            const traffic = Math.round(baseTraffic * (pageviewMultipliers[data.pageviews] || 1) * (verticalMultipliers[data.vertical] || 1));
+            
+            const annualRevenue = Math.round((traffic * 12 * 15) / 1000);
+            
+            return {
+                traffic: traffic.toLocaleString(),
+                revenue: '$' + annualRevenue.toLocaleString()
+            };
+        }
+        
+        function generateActionItems(data) {
+            const items = [];
+            
+            if (['food', 'lifestyle', 'parenting'].includes(data.vertical)) {
+                items.push({
+                    priority: 'high',
+                    title: 'Optimize your visual content strategy',
+                    description: `${data.vertical.charAt(0).toUpperCase() + data.vertical.slice(1)} content performs exceptionally well on Discover. Focus on high-quality, original images that tell a story. Aim for 8-12 images per post with proper alt text and captions.`
+                });
+            }
+            
+            if (['monthly', 'rarely'].includes(data.publishFrequency)) {
+                items.push({
+                    priority: 'high',
+                    title: 'Increase your publishing cadence',
+                    description: 'Discover favors sites with fresh, consistent content. Aim for at least 2-3 posts per week. Quality matters more than quantity, but regular publishing signals to Google that your site is active and relevant.'
+                });
+            }
+            
+            if (data.discoverTraffic === 'no' || data.discoverTraffic === 'unknown') {
+                items.push({
+                    priority: 'high',
+                    title: 'Enable Discover tracking in Search Console',
+                    description: 'Set up Google Search Console if you haven\'t already, and monitor your Discover performance. This data is crucial for understanding what content resonates and optimizing your strategy.'
+                });
+            }
+            
+            if (['few', 'none'].includes(data.imageCount)) {
+                items.push({
+                    priority: 'medium',
+                    title: 'Enhance visual storytelling',
+                    description: 'Discover is a visual platform. Add more high-quality, large images (at least 1200px wide) to your posts. Consider creating custom graphics, infographics, or photo collages to make your content stand out.'
+                });
+            }
+            
+            items.push({
+                priority: 'medium',
+                title: 'Implement technical best practices',
+                description: 'Ensure your site is mobile-optimized, has fast loading times (Core Web Vitals), uses structured data markup, and follows Google\'s E-E-A-T guidelines. These factors significantly impact Discover eligibility.'
+            });
+            
+            if (['under50k', '50k-100k'].includes(data.pageviews)) {
+                items.push({
+                    priority: 'low',
+                    title: 'Build your baseline traffic first',
+                    description: 'While Discover can be transformative, focus on foundational SEO and audience growth. Aim for 100K+ monthly pageviews to maximize your Discover potential and ad revenue opportunities.'
+                });
+            }
+            
+            const container = document.getElementById('actionItemsList');
+            container.innerHTML = '';
+            
+            items.slice(0, 4).forEach(item => {
+                const priorityClass = 'priority-' + item.priority;
+                const html = `
+                    <div class="action-item">
+                        <span class="priority-badge ${priorityClass}">${item.priority.toUpperCase()} PRIORITY</span>
+                        <h4>${item.title}</h4>
+                        <p>${item.description}</p>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+        
+        function submitEmail() {
+            const email = document.getElementById('emailInput').value;
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            console.log('Email submitted:', email);
+            
+            document.querySelector('.email-gate').innerHTML = `
+                <h3>Check your inbox!</h3>
+                <p style="font-size: 18px; margin-top: 16px;">Your complete Discover Readiness Report is on its way. We've also added you to our Creator Success series where you'll get actionable tips to grow your traffic and revenue.</p>
+                <p style="margin-top: 24px; font-size: 14px; opacity: 0.8;">Want to talk strategy? <a href="#" style="color: white; text-decoration: underline;">Schedule a call with our team</a></p>
+            `;
+        }
+    </script>
+</body>
+</html>
