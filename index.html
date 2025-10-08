@@ -67,6 +67,7 @@
         }
         
         input[type="url"],
+        input[type="text"],
         select {
             width: 100%;
             padding: 14px 16px;
@@ -78,9 +79,44 @@
         }
         
         input[type="url"]:focus,
+        input[type="text"]:focus,
         select:focus {
             outline: none;
             border-color: #6b65ff;
+        }
+        
+        .url-input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e1dad4;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        
+        .url-input-wrapper:focus-within {
+            border-color: #6b65ff;
+        }
+        
+        .url-prefix {
+            background: #f0edeb;
+            padding: 14px 12px;
+            color: #666;
+            font-size: 16px;
+            white-space: nowrap;
+            user-select: none;
+        }
+        
+        .url-input-wrapper input {
+            flex: 1;
+            border: none;
+            padding: 14px 16px;
+            font-size: 16px;
+        }
+        
+        .url-input-wrapper input:focus {
+            outline: none;
+            border: none;
         }
         
         .radio-group {
@@ -333,7 +369,10 @@
                 
                 <div class="form-group">
                     <label for="siteUrl">What's your website URL?</label>
-                    <input type="url" id="siteUrl" placeholder="https://yoursite.com">
+                    <div class="url-input-wrapper">
+                        <span class="url-prefix">https://</span>
+                        <input type="text" id="siteUrl" placeholder="yoursite.com">
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -461,7 +500,9 @@
         function submitToGoogleForms(userData, email = null) {
             console.log('Submitting to Google Forms...', { userData, email });
             
-            const siteUrl = document.getElementById('siteUrl').value;
+            // Get site URL and add https:// prefix
+            const siteUrlInput = document.getElementById('siteUrl').value.trim();
+            const siteUrl = 'https://' + siteUrlInput.replace(/^https?:\/\//, ''); // Remove any existing protocol first
             
             // Google Forms URL
             const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
@@ -491,7 +532,7 @@
             
             // Add all fields
             addField('entry.1369606948', email); // Email
-            addField('entry.1494711612', siteUrl); // Site URL
+            addField('entry.1494711612', siteUrl); // Site URL (with https://)
             addField('entry.735261850', userData.vertical); // Vertical
             addField('entry.917309978', userData.pageviews); // Pageviews
             addField('entry.1931470314', userData.discoverTraffic); // Discover Traffic
@@ -503,7 +544,7 @@
             document.body.appendChild(form);
             form.submit();
             
-            console.log('Form submitted silently', email ? 'WITH email' : 'WITHOUT email');
+            console.log('Form submitted silently', email ? 'WITH email' : 'WITHOUT email', 'URL:', siteUrl);
             
             // Clean up
             setTimeout(() => {
