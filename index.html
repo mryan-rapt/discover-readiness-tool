@@ -500,11 +500,14 @@
         function submitToGoogleForms(userData, email = null) {
             console.log('Submitting to Google Forms...', { userData, email });
             
-            // Use stored URL or construct it fresh
+            // Get URL from hidden input (more reliable than window variable)
+            const hiddenUrlInput = document.getElementById('fullSiteUrl');
             let siteUrl;
-            if (window.storedSiteUrl) {
-                siteUrl = window.storedSiteUrl;
+            
+            if (hiddenUrlInput && hiddenUrlInput.value) {
+                siteUrl = hiddenUrlInput.value;
             } else {
+                // Fallback: construct it fresh
                 const siteUrlInput = document.getElementById('siteUrl').value.trim();
                 siteUrl = 'https://' + siteUrlInput.replace(/^https?:\/\//, '');
             }
@@ -523,7 +526,7 @@
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = formUrl;
-            form.target = iframeName; // Submit to hidden iframe
+            form.target = iframeName;
             form.style.display = 'none';
             
             // Helper function to add input fields
@@ -766,6 +769,36 @@
                 `;
                 container.innerHTML += html;
             });
+        }
+        
+        function submitEmail() {
+            const email = document.getElementById('emailInput').value;
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            console.log('Email gate submission...');
+            
+            // Get the stored assessment data and add email
+            const userData = {
+                vertical: document.getElementById('vertical').value,
+                pageviews: document.getElementById('pageviews').value,
+                discoverTraffic: document.querySelector('input[name="discoverTraffic"]:checked').value,
+                publishFrequency: document.getElementById('publishFrequency').value,
+                imageCount: document.getElementById('imageCount').value,
+                score: document.getElementById('scoreNumber').textContent
+            };
+            
+            // Submit to Google Forms WITH email (second touchpoint)
+            submitToGoogleForms(userData, email);
+            
+            // Show success message immediately
+            document.querySelector('.email-gate').innerHTML = `
+                <h3>Check your inbox!</h3>
+                <p style="font-size: 18px; margin-top: 16px;">Your complete Discover Readiness Report is on its way. We've also added you to our Creator Success series where you'll get actionable tips to grow your traffic and revenue.</p>
+                <p style="margin-top: 24px; font-size: 14px; opacity: 0.8;">Want to talk strategy? <a href="https://raptive.com/contact" style="color: white; text-decoration: underline;">Schedule a call with our team</a></p>
+            `;
         }
         
         function submitEmail() {
