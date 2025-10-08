@@ -770,8 +770,8 @@
                 container.innerHTML += html;
             });
         }
-        
-        function submitEmail() {
+
+function submitEmail() {
             const email = document.getElementById('emailInput').value;
             if (!email || !email.includes('@')) {
                 alert('Please enter a valid email address');
@@ -792,86 +792,6 @@
             
             // Submit to Google Forms WITH email (second touchpoint)
             submitToGoogleForms(userData, email);
-            
-            // Show success message immediately
-            document.querySelector('.email-gate').innerHTML = `
-                <h3>Check your inbox!</h3>
-                <p style="font-size: 18px; margin-top: 16px;">Your complete Discover Readiness Report is on its way. We've also added you to our Creator Success series where you'll get actionable tips to grow your traffic and revenue.</p>
-                <p style="margin-top: 24px; font-size: 14px; opacity: 0.8;">Want to talk strategy? <a href="https://raptive.com/contact" style="color: white; text-decoration: underline;">Schedule a call with our team</a></p>
-            `;
-        }
-        
-        function submitEmail() {
-            const email = document.getElementById('emailInput').value;
-            if (!email || !email.includes('@')) {
-                alert('Please enter a valid email address');
-                return;
-            }
-            
-            console.log('Starting submission...');
-            
-            // Get all the stored data from when they calculated the score
-            const siteUrl = document.getElementById('siteUrl').value;
-            const vertical = document.getElementById('vertical').value;
-            const pageviews = document.getElementById('pageviews').value;
-            const discoverTrafficEl = document.querySelector('input[name="discoverTraffic"]:checked');
-            const publishFrequency = document.getElementById('publishFrequency').value;
-            const imageCount = document.getElementById('imageCount').value;
-            const score = document.getElementById('scoreNumber').textContent;
-            
-            console.log('Form data collected:', {
-                email, siteUrl, vertical, pageviews, 
-                discoverTraffic: discoverTrafficEl ? discoverTrafficEl.value : 'not selected',
-                publishFrequency, imageCount, score
-            });
-            
-            // Build URL with query parameters (alternative method that's more reliable)
-            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
-            
-            const params = new URLSearchParams({
-                'entry.1369606948': email,
-                'entry.1494711612': siteUrl,
-                'entry.735261850': vertical,
-                'entry.917309978': pageviews,
-                'entry.1931470314': discoverTrafficEl ? discoverTrafficEl.value : 'unknown',
-                'entry.107284355': publishFrequency,
-                'entry.1100522340': imageCount,
-                'entry.631904103': score,
-                'entry.428354401': new Date().toISOString()
-            });
-            
-            console.log('Submitting to Google Forms...');
-            
-            // Use iframe method for better compatibility
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.name = 'hidden_iframe';
-            document.body.appendChild(iframe);
-            
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = formUrl;
-            form.target = 'hidden_iframe';
-            
-            // Add all fields as hidden inputs
-            params.forEach((value, key) => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                form.appendChild(input);
-            });
-            
-            document.body.appendChild(form);
-            form.submit();
-            
-            console.log('Form submitted via iframe method');
-            
-            // Clean up after a moment
-            setTimeout(() => {
-                document.body.removeChild(form);
-                document.body.removeChild(iframe);
-            }, 1000);
             
             // Show success message immediately
             document.querySelector('.email-gate').innerHTML = `
