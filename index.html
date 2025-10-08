@@ -466,11 +466,18 @@
             // Google Forms URL
             const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
             
+            // Create hidden iframe
+            const iframeName = 'hidden_iframe_' + Date.now();
+            const iframe = document.createElement('iframe');
+            iframe.name = iframeName;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
             // Create a form element
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = formUrl;
-            form.target = '_blank'; // Open in new tab temporarily for testing
+            form.target = iframeName; // Submit to hidden iframe
             form.style.display = 'none';
             
             // Helper function to add input fields
@@ -496,12 +503,13 @@
             document.body.appendChild(form);
             form.submit();
             
-            console.log('Form submitted', email ? 'WITH email' : 'WITHOUT email');
+            console.log('Form submitted silently', email ? 'WITH email' : 'WITHOUT email');
             
             // Clean up
             setTimeout(() => {
-                document.body.removeChild(form);
-            }, 1000);
+                if (form.parentNode) document.body.removeChild(form);
+                if (iframe.parentNode) document.body.removeChild(iframe);
+            }, 2000);
         }
         
         // Scoring logic
