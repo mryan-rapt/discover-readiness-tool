@@ -595,10 +595,19 @@
             score += publishFrequencyScores[publishFrequency] || 0;
             score += imageCountScores[imageCount] || 0;
             
-            // Store the full URL with https:// for later use
+            // Create a hidden input with the full URL
             const siteUrlInput = document.getElementById('siteUrl').value.trim();
             const fullSiteUrl = 'https://' + siteUrlInput.replace(/^https?:\/\//, '');
-            window.storedSiteUrl = fullSiteUrl;
+            
+            // Store in a hidden input field that persists
+            let hiddenUrlInput = document.getElementById('fullSiteUrl');
+            if (!hiddenUrlInput) {
+                hiddenUrlInput = document.createElement('input');
+                hiddenUrlInput.type = 'hidden';
+                hiddenUrlInput.id = 'fullSiteUrl';
+                document.body.appendChild(hiddenUrlInput);
+            }
+            hiddenUrlInput.value = fullSiteUrl;
             
             const userData = { vertical, pageviews, discoverTraffic, publishFrequency, imageCount, score };
             
