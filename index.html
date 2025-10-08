@@ -463,50 +463,44 @@
             
             const siteUrl = document.getElementById('siteUrl').value;
             
-            // Build URL with query parameters
+            // Google Forms URL
             const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
             
-            const params = new URLSearchParams({
-                'entry.1369606948': email || '', // Email (empty on first submission)
-                'entry.1494711612': siteUrl,
-                'entry.735261850': userData.vertical,
-                'entry.917309978': userData.pageviews,
-                'entry.1931470314': userData.discoverTraffic,
-                'entry.107284355': userData.publishFrequency,
-                'entry.1100522340': userData.imageCount,
-                'entry.631904103': userData.score,
-                'entry.428354401': new Date().toISOString()
-            });
-            
-            // Use iframe method for better compatibility
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.name = 'hidden_iframe_' + Date.now();
-            document.body.appendChild(iframe);
-            
+            // Create a form element
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = formUrl;
-            form.target = iframe.name;
+            form.target = '_blank'; // Open in new tab temporarily for testing
+            form.style.display = 'none';
             
-            // Add all fields as hidden inputs
-            params.forEach((value, key) => {
+            // Helper function to add input fields
+            function addField(name, value) {
                 const input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = key;
-                input.value = value;
+                input.name = name;
+                input.value = value || '';
                 form.appendChild(input);
-            });
+            }
+            
+            // Add all fields
+            addField('entry.1369606948', email); // Email
+            addField('entry.1494711612', siteUrl); // Site URL
+            addField('entry.735261850', userData.vertical); // Vertical
+            addField('entry.917309978', userData.pageviews); // Pageviews
+            addField('entry.1931470314', userData.discoverTraffic); // Discover Traffic
+            addField('entry.107284355', userData.publishFrequency); // Publish Frequency
+            addField('entry.1100522340', userData.imageCount); // Image Count
+            addField('entry.631904103', userData.score); // Score
+            addField('entry.428354401', new Date().toISOString()); // Timestamp
             
             document.body.appendChild(form);
             form.submit();
             
-            console.log('Form submitted via iframe method', email ? 'WITH email' : 'WITHOUT email');
+            console.log('Form submitted', email ? 'WITH email' : 'WITHOUT email');
             
-            // Clean up after a moment
+            // Clean up
             setTimeout(() => {
                 document.body.removeChild(form);
-                document.body.removeChild(iframe);
             }, 1000);
         }
         
