@@ -500,9 +500,14 @@
         function submitToGoogleForms(userData, email = null) {
             console.log('Submitting to Google Forms...', { userData, email });
             
-            // Get site URL and add https:// prefix
-            const siteUrlInput = document.getElementById('siteUrl').value.trim();
-            const siteUrl = 'https://' + siteUrlInput.replace(/^https?:\/\//, ''); // Remove any existing protocol first
+            // Use stored URL or construct it fresh
+            let siteUrl;
+            if (window.storedSiteUrl) {
+                siteUrl = window.storedSiteUrl;
+            } else {
+                const siteUrlInput = document.getElementById('siteUrl').value.trim();
+                siteUrl = 'https://' + siteUrlInput.replace(/^https?:\/\//, '');
+            }
             
             // Google Forms URL
             const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
@@ -589,6 +594,11 @@
             score += discoverTrafficScores[discoverTraffic] || 0;
             score += publishFrequencyScores[publishFrequency] || 0;
             score += imageCountScores[imageCount] || 0;
+            
+            // Store the full URL with https:// for later use
+            const siteUrlInput = document.getElementById('siteUrl').value.trim();
+            const fullSiteUrl = 'https://' + siteUrlInput.replace(/^https?:\/\//, '');
+            window.storedSiteUrl = fullSiteUrl;
             
             const userData = { vertical, pageviews, discoverTraffic, publishFrequency, imageCount, score };
             
