@@ -658,31 +658,70 @@
                 return;
             }
             
-            // Collect all form data
-            const formData = new FormData();
+            console.log('Starting submission...');
             
-            // Map to your Google Form fields (in order)
-            formData.append('entry.1369606948', email); // Email
-            formData.append('entry.1494711612', document.getElementById('siteUrl').value); // Site URL
-            formData.append('entry.735261850', document.getElementById('vertical').value); // Vertical
-            formData.append('entry.917309978', document.getElementById('pageviews').value); // Pageviews
-            formData.append('entry.1931470314', document.querySelector('input[name="discoverTraffic"]:checked').value); // Discover Traffic
-            formData.append('entry.107284355', document.getElementById('publishFrequency').value); // Publish Frequency
-            formData.append('entry.1100522340', document.getElementById('imageCount').value); // Image Count
-            formData.append('entry.631904103', document.getElementById('scoreNumber').textContent); // Score
-            formData.append('entry.428354401', new Date().toISOString()); // Timestamp
+            // Get all the stored data from when they calculated the score
+            const siteUrl = document.getElementById('siteUrl').value;
+            const vertical = document.getElementById('vertical').value;
+            const pageviews = document.getElementById('pageviews').value;
+            const discoverTrafficEl = document.querySelector('input[name="discoverTraffic"]:checked');
+            const publishFrequency = document.getElementById('publishFrequency').value;
+            const imageCount = document.getElementById('imageCount').value;
+            const score = document.getElementById('scoreNumber').textContent;
             
-            // Submit to Google Form
-            fetch('https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse', {
-                method: 'POST',
-                mode: 'no-cors',
-                body: formData
-            }).then(() => {
-                console.log('Form submitted successfully');
-            }).catch(error => {
-                console.error('Submission error:', error);
-                // Still show success since no-cors prevents error detection
+            console.log('Form data collected:', {
+                email, siteUrl, vertical, pageviews, 
+                discoverTraffic: discoverTrafficEl ? discoverTrafficEl.value : 'not selected',
+                publishFrequency, imageCount, score
             });
+            
+            // Build URL with query parameters (alternative method that's more reliable)
+            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScWkXweMhp-_U6haLYCRUeMBJ_fvH5lJnnnkeMn4maYdKro_g/formResponse';
+            
+            const params = new URLSearchParams({
+                'entry.1369606948': email,
+                'entry.1494711612': siteUrl,
+                'entry.735261850': vertical,
+                'entry.917309978': pageviews,
+                'entry.1931470314': discoverTrafficEl ? discoverTrafficEl.value : 'unknown',
+                'entry.107284355': publishFrequency,
+                'entry.1100522340': imageCount,
+                'entry.631904103': score,
+                'entry.428354401': new Date().toISOString()
+            });
+            
+            console.log('Submitting to Google Forms...');
+            
+            // Use iframe method for better compatibility
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.name = 'hidden_iframe';
+            document.body.appendChild(iframe);
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = formUrl;
+            form.target = 'hidden_iframe';
+            
+            // Add all fields as hidden inputs
+            params.forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+            
+            console.log('Form submitted via iframe method');
+            
+            // Clean up after a moment
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 1000);
             
             // Show success message immediately
             document.querySelector('.email-gate').innerHTML = `
